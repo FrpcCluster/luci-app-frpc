@@ -14,7 +14,7 @@ else
 end
 
 a=Map(i,translate("Frp Setting"), translate("Frp is a fast reverse proxy to help you expose a local server behind a NAT or firewall to the internet."))
---a:section(SimpleSection).template="frp/frp_status"
+a:section(SimpleSection).template="frp/frp_status"
 t=a:section(NamedSection,"common","frp",translate("Global Setting"))
 t.anonymous=true
 t.addremove=false
@@ -30,24 +30,25 @@ info = luci.sys.exec("/usr/bin/frpc --v")
 
 e=t:taboption("base",Value, "ver", translate("Software version"), translate("Custom version.<strong><font color=\"green\">current version:</font></strong>") .. info)
 e.rmempty=false
-e:value("0.14.1")
-e:value("0.15.1")
-e:value("0.16.0")
 e:value("0.16.1")
+e:value("0.18.0")
+e:value("0.21.0")
+
 
 e=t:taboption("base",Value, "bin_path", translate("Operating mode"), translate("Flash mode requires 6M of storage space, if not enough space, please use memory mode"))
 e.rmempty=false
 e:value("/tmp/etc/frp/frpc", translate("RAM  /tmp/etc/frp/frpc"))
 e:value("/etc/frp/frpc", translate("Flash  /etc/frp/frpc"))
 
-e=t:taboption("base", ListValue,"url" ,  translate("Download source address"), 
+e=t:taboption("base", ListValue,"url" ,  translate("Download source address"),
 	translate("<br /><input type=\"button\" class=\"cbi-button cbi-button-apply\" value=\"https://github.com/fatedier/frp/releases\" onclick=\"window.open('https://github.com/fatedier/frp/releases')\" /><br /><input type=\"button\" class=\"cbi-button cbi-button-apply\" value=\"http://down.xxorg.com/frp 国内源\" onclick=\"window.open('http://down.xxorg.com/?directory=./frp/')\" />"))
 e.rmempty=false
 e:value("1", translate("https://github.com/fatedier/frp/releases"))
 e:value("2", translate("http://down.xxorg.com/frp 国内源"))
 e:value("3", translate("MTK 处理器专用源"))
 
-e=t:taboption("base",Value, "server_addr", translate("Server"), translate("<strong>0.10.0以上版本：</strong><br />freenat.bid<br />freenat.ml<br />freefrp.cn<br />frpzj.lu8.win 密码：frp888<br />www.nat.ee 密码：www.nat.ee<br />frp2.chuantou.org 支持http KCP 密码：www.xxorg.com"))
+e=t:taboption("base",Value, "server_addr", translate("Server"))
+e.optional=false
 e.rmempty=false
 e:value("freenat.bid", translate("freenat.bid 密码：frp888"))
 e:value("freenat.ml", translate("freenat.ml 密码：frp888"))
@@ -60,8 +61,7 @@ e=t:taboption("base",Value, "server_port", translate("Port"))
 e.datatype = "port"
 e.optional=false
 e.rmempty=false
-
-e=t:taboption("base",Value, "privilege_token", translate("Privilege Token"), translate("Time duration between server of frpc and frps mustn't exceed 15 minutes."))
+e=t:taboption("base",Value, "token", translate("Token"), translate("Time duration between server of frpc and frps mustn't exceed 15 minutes."))
 e.optional=false
 e.password=true
 e.rmempty=false
@@ -150,13 +150,10 @@ e.map:del(t)
 luci.http.redirect(o.build_url("admin","services","frp"))
 end
 local o=""
-
 e=t:option(DummyValue,"remark",translate("Service Remark Name"))
 e.width="10%"
-
 e=t:option(DummyValue,"type",translate("Frp Protocol Type"))
 e.width="10%"
-
 e=t:option(DummyValue,"custom_domains",translate("Domain/Subdomain"))
 e.width="20%"
 e.cfgvalue=function(t,n)
@@ -173,7 +170,6 @@ b="%s/%s"%{b,c} return b end
 if m=="tcp" or m=="udp" then
 local b=a.uci:get(i,"common","server_addr")or"" return b end
 end
-
 e=t:option(DummyValue,"remote_port",translate("Remote Port"))
 e.width="10%"
 e.cfgvalue=function(t,b)
@@ -186,13 +182,10 @@ local b=a.uci:get(i,"common","vhost_https_port")or"" return b end
 if t=="tcp" or t=="udp" then
 local b=a.uci:get(i,b,"remote_port")or"" return b end
 end
-
 e=t:option(DummyValue,"local_ip",translate("Local Host Address"))
 e.width="15%"
-
 e=t:option(DummyValue,"local_port",translate("Local Host Port"))
 e.width="10%"
-
 e=t:option(DummyValue,"use_encryption",translate("Use Encryption"))
 e.width="15%"
 e.cfgvalue=function(t,n)
