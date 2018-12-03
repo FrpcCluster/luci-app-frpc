@@ -12,7 +12,7 @@ PKG_VERSION:=1.1
 PKG_RELEASE:=2
 PKG_BUILD_DIR := $(BUILD_DIR)/$(PKG_NAME)
 
-PO2LMO:=$(TOPDIR)/po2lmo
+PO2LMO:=$(BUILD_DIR)/po2lmo
 
 include $(INCLUDE_DIR)/package.mk
 
