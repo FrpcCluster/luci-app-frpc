@@ -9,10 +9,10 @@ include $(TOPDIR)/rules.mk
 
 PKG_NAME:=luci-app-frpc
 PKG_VERSION:=1
-PKG_RELEASE:=4
+PKG_RELEASE:=6
 PKG_BUILD_DIR := $(BUILD_DIR)/$(PKG_NAME)
 
-PO2LMO:=$(TOPDIR)/package/luci-app-frpc/tools/po2lmo/src/po2lmo
+PO2LMO:=$(TOPDIR)/po2lmo
 
 include $(INCLUDE_DIR)/package.mk
 

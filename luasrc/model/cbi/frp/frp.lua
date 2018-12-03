@@ -1,66 +1,60 @@
 local o=require"luci.dispatcher"
 local e=require("luci.model.ipkg")
 local s=require"nixio.fs"
+local SYS  = require "luci.sys"
+
 local e=luci.model.uci.cursor()
 local i="frp"
 local a,t,e
 local n={}
-local running=(luci.sys.call("pidof frpc > /dev/null") == 0)
-
-if running then
-  a = Map(i,translate("Frp Setting"), "<b><font color=\"green\">" .. translate("Frpc is running!") .. "</font></b>")
+if SYS.call("pidof frpc >/dev/null") == 0 then
+	Status = translate("<strong><font color=\"green\">frpc is Running</font></strong>")
 else
-  a = Map(i,translate("Frp Setting"), "<b><font color=\"red\">" .. translate("Frpc is not running!") .. "</font></b>")
+	Status = translate("<strong><font color=\"red\">frpc is Not Running</font></strong>")
 end
 
-t=a:section(NamedSection,"common","frp",translate("Global Setting"), translate("Frp is a fast reverse proxy to help you expose a local server behind a NAT or firewall to the internet."))
+a=Map(i,translate("Frp Setting"), translate("Frp is a fast reverse proxy to help you expose a local server behind a NAT or firewall to the internet."))
+--a:section(SimpleSection).template="frp/frp_status"
+t=a:section(NamedSection,"common","frp",translate("Global Setting"))
 t.anonymous=true
 t.addremove=false
+t.description = translate(string.format("%s<br /><br />", Status))
 
 t:tab("base",translate("Basic Settings"))
 t:tab("other",translate("Other Settings"))
 t:tab("log",translate("Client Log"))
-
 e=t:taboption("base",Flag, "enabled", translate("Enabled"))
 e.rmempty=false
 
-if not nixio.fs.access("/usr/bin/frpc") then
-downloadfile=1    
-end
+info = luci.sys.exec("/usr/bin/frpc --v")
 
-if downloadfile==1 then
-
-e = t:taboption("base", Button, "get_frp_version", translate("刷新版本"), translate("获取可下载的FRP文件版本."))
-e.inputtitle = translate("刷新版本")
-e.inputstyle = "apply"
-
-function e.write(self, section)
-  os.execute("curl -k -s https://github.com/fatedier/frp/tags | grep 'tag-name'|awk -F '[v]' '{print $2}'|awk -F '[\<]' '{print $1}' >/tmp/log/frp_version &")
-  self.inputtitle = translate("刷新版本")
-end
-
-e = t:taboption("base", Value, "url", "执行文件下载网址")
-e:value("git", "git下载")
-e:value("blog", "默认下载")
-e.placeholder = "git"
-
-e = t:taboption("base", ListValue, "version_g","下载执行文件版本", "git下载时，需要先执行上面的获取版本，并刷新页面。")
-for i_1 in io.popen("cat /tmp/log/frp_version", "r"):lines() do
-    e:value(i_1)
-end
-e:depends("url", "git")
-
-e = t:taboption("base", Value, "version_d","下载执行文件版本")
-e:value("0.14.1", "0.14.1")
-e:value("0.14.0", "0.14.0")
-e:value("0.13.0", "0.13.0")
-e.placeholder = "0.14.1"
-e:depends("url", "blog")
-end
-
-e=t:taboption("base",Value, "server_addr", translate("Server"))
-e.optional=false
+e=t:taboption("base",Value, "ver", translate("Software version"), translate("Custom version.<strong><font color=\"green\">current version:</font></strong>") .. info)
 e.rmempty=false
+e:value("0.14.1")
+e:value("0.15.1")
+e:value("0.16.0")
+e:value("0.16.1")
+
+e=t:taboption("base",Value, "bin_path", translate("Operating mode"), translate("Flash mode requires 6M of storage space, if not enough space, please use memory mode"))
+e.rmempty=false
+e:value("/tmp/etc/frp/frpc", translate("RAM  /tmp/etc/frp/frpc"))
+e:value("/etc/frp/frpc", translate("Flash  /etc/frp/frpc"))
+
+e=t:taboption("base", ListValue,"url" ,  translate("Download source address"), 
+	translate("<br /><input type=\"button\" class=\"cbi-button cbi-button-apply\" value=\"https://github.com/fatedier/frp/releases\" onclick=\"window.open('https://github.com/fatedier/frp/releases')\" /><br /><input type=\"button\" class=\"cbi-button cbi-button-apply\" value=\"http://down.xxorg.com/frp 国内源\" onclick=\"window.open('http://down.xxorg.com/?directory=./frp/')\" />"))
+e.rmempty=false
+e:value("1", translate("https://github.com/fatedier/frp/releases"))
+e:value("2", translate("http://down.xxorg.com/frp 国内源"))
+e:value("3", translate("MTK 处理器专用源"))
+
+e=t:taboption("base",Value, "server_addr", translate("Server"), translate("<strong>0.10.0以上版本：</strong><br />freenat.bid<br />freenat.ml<br />freefrp.cn<br />frpzj.lu8.win 密码：frp888<br />www.nat.ee 密码：www.nat.ee<br />frp2.chuantou.org 支持http KCP 密码：www.xxorg.com"))
+e.rmempty=false
+e:value("freenat.bid", translate("freenat.bid 密码：frp888"))
+e:value("freenat.ml", translate("freenat.ml 密码：frp888"))
+e:value("freefrp.cn", translate("freefrp.cn 密码：frp888"))
+e:value("frpzj.lu8.win", translate("frpzj.lu8.win密码：frp888"))
+e:value("frp2.chuantou.org", translate("frp2.chuantou.org 密码：www.xxorg.com 支持http"))
+e:value("nat.ee", translate("nat.ee 密码：www.nat.ee"))
 
 e=t:taboption("base",Value, "server_port", translate("Port"))
 e.datatype = "port"
@@ -79,22 +73,6 @@ e.rmempty=false
 e=t:taboption("base",Value, "vhost_https_port", translate("Vhost HTTPS Port"))
 e.datatype = "port"
 e.rmempty=false
-
-e=t:taboption("base",Value,"time",translate("Service registration interval"),translate("0 means disable this feature, unit: min"))
-e.datatype="range(0,59)"
-e.default=30
-e.rmempty=false
-
-e = t:taboption("base", Button, "del_frp", translate("del_frp"), translate("Sometims the download files is incorrect, you can delete them."))
-e.inputtitle = translate("del_frp")
-e.inputstyle = "apply"
-
-function e.write(self, section)
-  os.execute("[ -h '/usr/bin/frpc' ] && rm /usr/bin/frpc && rm -rf /var/frpc &")
-  self.inputtitle = translate("del_frp")
-end
-
-
 e=t:taboption("other",Flag, "login_fail_exit", translate("Exit program when first login failed"),translate("decide if exit program when first login failed, otherwise continuous relogin to frps."))
 e.default = "1"
 e.rmempty=false
@@ -127,7 +105,10 @@ e.datatype="uinteger"
 e.default = "1"
 e:depends("enable_cpool",1)
 e.optional=false
-
+e=t:taboption("base",Value,"time",translate("Service registration interval"),translate("0 means disable this feature, unit: min"))
+e.datatype="range(0,59)"
+e.default=30
+e.rmempty=false
 e=t:taboption("other",ListValue, "log_level", translate("Log Level"))
 e.default = "warn"
 e:value("trace",translate("Trace"))
@@ -222,7 +203,6 @@ if t=="1" then b="ON"
 else b="OFF" end
 return b
 end
-
 e=t:option(DummyValue,"use_compression",translate("Use Compression"))
 e.width="15%"
 e.cfgvalue=function(t,n)
@@ -233,7 +213,6 @@ if t=="1" then b="ON"
 else b="OFF" end
 return b
 end
-
 e=t:option(Flag,"enable",translate("Enable State"))
 e.width="10%"
 e.rmempty=false
