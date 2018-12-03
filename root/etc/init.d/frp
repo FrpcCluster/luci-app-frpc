@@ -191,7 +191,7 @@ download_binary(){
 	tmpfile=/tmp/etc/tmp_frpc
 	rm -rf $bin_path
 
-	[ ! -s "/tmp/$tarfile" ] && [ ! -f "$bin_path" ] && wget --no-check-certificate --timeout=10 --tries=10 -o $LOGFILE https://github.com/fatedier/frp/releases/download/v$filever/$tarfile -O /tmp/$tarfile && echo_date "成功下载frpc二进制文件..."
+	[ ! -s "/tmp/$tarfile" ] && [ ! -f "$bin_path" ] && wget --no-check-certificate --timeout=10 https://github.com/fatedier/frp/releases/download/v$filever/$tarfile -O /tmp/$tarfile && echo_date "成功下载frpc二进制文件..."
 
 	[ -f /tmp/$tarfile ] && tar zxvf /tmp/$tarfile -C /tmp && \
 	mv /tmp/frp_"$filever"_linux_$ARCH/frpc  $bin_path
@@ -213,7 +213,7 @@ download_binary2(){
 	tmpfile=/tmp/etc/tmp_frpc
 	rm -rf $bin_path
 	
-	[ ! -s "$bin_path" ] && wget --timeout=10 --tries=10 -o $LOGFILE http://down.xxorg.com/frp/frp_"$filever"/frp_"$filever"_linux_$ARCH/frpc -O $tmpfile && echo_date "成功下载frpc二进制文件."
+	[ ! -s "$bin_path" ] && wget --timeout=10 http://down.xxorg.com/frp/frp_"$filever"/frp_"$filever"_linux_$ARCH/frpc -O $tmpfile && echo_date "成功下载frpc二进制文件."
 
 	mv $tmpfile $bin_path
 	[ -f "$bin_path" ] && ln -s $bin_path /usr/bin/frpc
@@ -233,7 +233,7 @@ download_binary3(){
 	tmpfile=/tmp/etc/tmp_frpc
 	rm -rf $bin_path
 	
-	wget  --timeout=10 --tries=10 -o $LOGFILE http://www.cn2qq.com/opt-file/frpc  -O $tmpfile && echo_date "成功下载frpc二进制文件mipsle"
+	wget  --timeout=10 http://www.cn2qq.com/opt-file/frpc  -O $tmpfile && echo_date "成功下载frpc二进制文件mipsle"
 
 	mv $tmpfile $bin_path
 	[ -f "$bin_path" ] && ln -s $bin_path /usr/bin/frpc
