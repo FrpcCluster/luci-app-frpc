@@ -1,9 +1,22 @@
 luci-app-frpc
 ===
 
-frpc的管理界面
+Openwrt上的frpc的管理界面
 代码参考 http://www.right.com.cn/forum/thread-306836-1-1.html 以及明月永在的界面
 
+安装
+---
+在路由器上执行 wget 下载 [release](https://github.com/LinEvil/luci-app-frpc/releases) 中的 ipk 软件包并安装
+```bash
+# 比如
+wget https://github.com/LinEvil/luci-app-frpc/releases/download/1.1-2/luci-app-frpc_1.1-2_all.ipk
+opkg install luci-app-frpc_1.1-2_all.ipk
+```
+
+使用
+---
+
+请参考 [frp文档](https://github.com/fatedier/frp/blob/master/README_zh.md)
 
 编译
 ---
